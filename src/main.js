@@ -1,12 +1,12 @@
 import Vue from 'vue'
 import App from './App.vue'
 
-import ElementUI from 'element-ui';
-import 'element-ui/lib/theme-chalk/index.css'
+import VueFileAgent from 'vue-file-agent';
+import 'vue-file-agent/dist/vue-file-agent.css';
+
+Vue.use(VueFileAgent);
 
 Vue.config.productionTip = false
-
-Vue.use(ElementUI);
 
 new Vue({
   render: h => h(App),

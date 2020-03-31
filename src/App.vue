@@ -1,28 +1,47 @@
 <template>
   <div id="app">
-    <el-row class="merge-image">
-      <el-col :span="8" class="merge-image__left">
-        <div class="sub-title">Name</div>
-        <el-input placeholder="Please input" v-model="input"></el-input>
-      </el-col>
-      <el-col :span="4" class="merge-image__right">
-        <el-button style="margin-left: 10px;" size="small" type="success">Merge Images</el-button>
-      </el-col>
-    </el-row>
+    <div class="pt-wrapper">
+      <div class="pt-container">
+        <div class="pt-img-header mb-100">
+          <h1>ツールアプリ写真ジョイナー</h1>
+        </div>
+        <div class="pt-img__body">
+          <div class="pt-img__body__box mb-100">
 
-    <el-upload
-      action="#"
-      list-type="picture-card"
-      ref="upload"
-      :auto-upload="false"
-      accept="image/png, image/jpeg"
-      multiple>
-      <i slot="default" class="el-icon-plus"></i>
-    </el-upload>
+            <div class="left">
 
-    <el-dialog :visible.sync="dialogVisible">
-      <img width="100%" :src="dialogImageUrl" alt="">
-    </el-dialog>
+              <label for="name">
+                名前
+                <input type="text" placeholder="ファイル名を書き込む..." id="name">
+              </label>
+            </div>
+
+            <div class="right">
+              <button @click="clearImages()">
+                晴れ
+              </button>
+              <button :disabled="!fileRecordsForUpload.length" @click="mergeFiles()">
+                マージ
+              </button>
+            </div>
+          </div>
+          <div class="pt-img__body__add">
+            <VueFileAgent
+              ref="vueFileAgent"
+              :multiple="true"
+              :deletable="true"
+              :meta="true"
+              :accept="'image/*'"
+              :maxFiles="14"
+              :helpText="'画像ファイルを選択'"
+              @select="filesSelected($event)"
+              @delete="fileDeleted($event)"
+              v-model="fileRecords">
+            </VueFileAgent>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -33,43 +52,114 @@
 
     data() {
       return {
-        dialogImageUrl: '',
-        dialogVisible: false,
-        input: ''
+        fileRecords: [],
+        fileRecordsForUpload: []
       };
     },
 
     methods: {
-      handleRemove(file) {
-        console.log(file);
+      mergeFiles() {
+        console.log(this.$refs.vueFileAgent.fileRecords);
       },
 
-      handlePictureCardPreview(file) {
-        this.dialogImageUrl = file.url;
-        this.dialogVisible = true;
+      clearImages() {
+        console.log('aa');
+        this.fileRecords = [];
+        this.fileRecordsForUpload = [];
       },
 
-      handleDownload(file) {
-        console.log(file);
+      filesSelected: function (fileRecordsNewlySelected) {
+        const validFileRecords = fileRecordsNewlySelected.filter((fileRecord) => !fileRecord.error);
+        this.fileRecordsForUpload = this.fileRecordsForUpload.concat(validFileRecords);
+      },
+
+      fileDeleted(fileRecord) {
+        const i = this.fileRecordsForUpload.indexOf(fileRecord);
+        if (i !== -1) {
+          this.fileRecordsForUpload.splice(i, 1);
+        }
       }
-    }
+    },
   }
 </script>
 
-<style>
-  .merge-image {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 30px;
-  }
+<style lang="scss" scoped>
+  #app {
+    /deep/ .vue-file-agent.file-input-wrapper {
+      border: 2px solid #f9f9f9;
+      text-align: center;
+    }
 
-  .merge-image__left {
-    display: flex;
-    align-items: center;
-  }
+    /deep/ .vue-file-agent .file-preview {
+      .file-name,
+      .image-dimension,
+      .file-ext,
+      .file-size {
+        display: none;
+      }
 
-  .merge-image__left .sub-title {
-    padding-right: 20px;
+      .file-delete {
+        font-size: 25px;
+        height: 25px;
+        width: 25px;
+      }
+
+      .help-text {
+        margin-top: 20px;
+      }
+    }
+
+    /deep/ .file-preview-wrapper {
+      width: 12%;
+      margin: 5px !important;
+    }
+
+    .pt-wrapper {
+      .pt-container {
+        padding: 0 15%;
+        margin-top: 100px;
+
+        .pt-img-header {
+          text-align: center;
+          font-size: 25px;
+        }
+
+        .pt-img__body__box {
+          display: flex;
+          justify-content: space-between;
+          align-content: center;
+
+          .left {
+            input {
+              border: 1px solid #ddd;
+              padding: 10px 30px;
+              margin-left: 15px;
+            }
+          }
+
+          .right {
+            button:first-child {
+              margin-right: 10px;
+            }
+
+            button {
+              width: 110px;
+              padding: 10px 30px;
+              background: none;
+              border: 1px solid #ddd;
+
+              &:focus {
+                outline: none;
+              }
+            }
+          }
+        }
+      }
+    }
+
+    .mb-100 {
+      margin-bottom: 100px;
+    }
+
   }
 </style>
