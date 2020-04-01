@@ -2,28 +2,17 @@
   <div id="app">
     <div class="pt-wrapper">
       <div class="pt-container">
-        <div class="pt-img-header mb-100">
-          <h1>ツールアプリ写真ジョイナー</h1>
+        <div class="pt-img-header mb-50">
+          <h1>ツールアプリ</h1>
         </div>
         <div class="pt-img__body">
-          <div class="pt-img__body__box mb-100">
-
-            <div class="left">
-
-              <label for="name">
-                名前
-                <input type="text" placeholder="ファイル名を書き込む..." id="name">
-              </label>
-            </div>
-
-            <div class="right">
-              <button @click="clearImages()">
-                晴れ
-              </button>
-              <button :disabled="!fileRecordsForUpload.length" @click="mergeFiles()">
-                マージ
-              </button>
-            </div>
+          <div class="pt-img__body__box mb-50">
+            <button class="btn-light" @click="clearImages()">
+              削除
+            </button>
+            <button class="btn-info" :disabled="!fileRecordsForUpload.length" @click="mergeFiles()">
+              結合
+            </button>
           </div>
           <div class="pt-img__body__add">
             <VueFileAgent
@@ -32,20 +21,39 @@
               :deletable="true"
               :meta="true"
               :accept="'image/*'"
-              :maxFiles="14"
-              :helpText="'画像ファイルを選択'"
+              :maxFiles="10"
+              :helpText="'アップロードしたい画像を指定ください。'"
               @select="filesSelected($event)"
               @delete="fileDeleted($event)"
               v-model="fileRecords">
             </VueFileAgent>
           </div>
+          <div class="pt-after" :class="{'d-none': !isClicked}">
+            <div class="left">
+
+              <label for="name">
+                ファイル名
+                <input type="text" placeholder="ファイル名を書き込む..." id="name" v-model="fileName">
+                .PNG
+              </label>
+            </div>
+
+            <div class="right">
+              <button class="btn-info" @click="saveImage()">
+                ダウンロード
+              </button>
+            </div>
+          </div>
         </div>
       </div>
+      <canvas id="joined"></canvas>
     </div>
   </div>
 </template>
 
 <script>
+  import photoJoiner from "./utils/helper";
+  import { saveAs } from 'file-saver';
 
   export default {
     name: 'App',
@@ -53,19 +61,56 @@
     data() {
       return {
         fileRecords: [],
-        fileRecordsForUpload: []
+        fileRecordsForUpload: [],
+        photoJoiner,
+        height: 170,
+        images: [],
+        fileName: 'picture',
+        isClicked: false
       };
+    },
+
+    mounted() {
+
     },
 
     methods: {
       mergeFiles() {
-        console.log(this.$refs.vueFileAgent.fileRecords);
+        let joiner = new photoJoiner();
+
+        this.$refs.vueFileAgent.fileRecords.forEach(val => {
+          this.images.push(val.urlResized);
+        });
+
+        joiner.join({
+          'images': this.images,
+          'canvasHeight': this.height
+        });
+
+        this.isClicked = true
+      },
+
+      saveImage() {
+        const canvas = document.getElementById('joined');
+
+        canvas.toBlob((blob) => {
+          saveAs(blob, `${this.fileName}.png`);
+        });
       },
 
       clearImages() {
-        console.log('aa');
+        const canvas = document.getElementById('joined');
+        const context = canvas.getContext('2d');
+
+        // clear img uploaded
         this.fileRecords = [];
         this.fileRecordsForUpload = [];
+
+        // clear img joiner
+        context.clearRect(0, 0, canvas.width, canvas.height);
+
+        // hidden
+        this.isClicked = false
       },
 
       filesSelected: function (fileRecordsNewlySelected) {
@@ -79,7 +124,7 @@
           this.fileRecordsForUpload.splice(i, 1);
         }
       }
-    },
+    }
   }
 </script>
 
@@ -105,7 +150,8 @@
       }
 
       .help-text {
-        margin-top: 20px;
+        margin-top: 10px;
+        font-size: 12px;
       }
     }
 
@@ -117,7 +163,7 @@
     .pt-wrapper {
       .pt-container {
         padding: 0 15%;
-        margin-top: 100px;
+        margin-top: 50px;
 
         .pt-img-header {
           text-align: center;
@@ -126,39 +172,89 @@
 
         .pt-img__body__box {
           display: flex;
-          justify-content: space-between;
+          justify-content: flex-end;
           align-content: center;
 
+          button:first-child {
+            color: #2C2C2C;
+            background: #fff;
+            border: 1px solid #686868;
+            margin-right: 15px;
+          }
+        }
+
+        .pt-img__body__add {
+          margin-bottom: 30px;
+        }
+
+        .pt-after {
+          display: flex;
+          justify-content: flex-end;
+          align-items: center;
+          margin-bottom: 30px;
+
           .left {
+            margin-right: 20px;
+
+            label {
+              font-size: 18px;
+            }
+
             input {
               border: 1px solid #ddd;
-              padding: 10px 30px;
+              padding: 10px 30px 10px 10px;
               margin-left: 15px;
             }
           }
 
           .right {
-            button:first-child {
-              margin-right: 10px;
-            }
-
             button {
-              width: 110px;
-              padding: 10px 30px;
-              background: none;
-              border: 1px solid #ddd;
-
-              &:focus {
-                outline: none;
-              }
+              width: 160px;
+              padding: 10px 20px;
             }
           }
         }
       }
     }
 
-    .mb-100 {
-      margin-bottom: 100px;
+    .mb-50 {
+      margin-bottom: 50px;
+    }
+
+    .btn-info {
+      &:hover, &.disabled:hover {
+        background: #1e88e5;
+        border: 1px solid #1e88e5;
+        -webkit-box-shadow: 0 14px 26px -12px rgba(23, 105, 255, 0.42), 0 4px 23px 0 rgba(0, 0, 0, 0.12), 0 8px 10px -5px rgba(23, 105, 255, 0.2);
+        box-shadow: 0 14px 26px -12px rgba(23, 105, 255, 0.42), 0 4px 23px 0 rgba(0, 0, 0, 0.12), 0 8px 10px -5px rgba(23, 105, 255, 0.2);
+      }
+    }
+
+    #joined {
+      display: block;
+      margin: 0 auto;
+    }
+
+    .txt-center {
+      text-align: center;
+    }
+
+    button {
+      width: 110px;
+      padding: 10px 30px;
+      color: #fff;
+      background: #0D69B3;
+      border: 1px solid #028ee1;
+      font-size: 16px;
+      border-radius: 5px;
+
+      &:focus {
+        outline: none;
+      }
+    }
+
+    .d-none {
+      display: none !important;
     }
 
   }
