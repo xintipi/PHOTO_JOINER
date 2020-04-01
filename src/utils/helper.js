@@ -39,15 +39,11 @@ function photoJoiner() {
     } else {
       canvas.width = canvasWidth;
 
-
       for (let i = 0; i < drawData.length; i++) {
         const current = drawData[i];
         context.drawImage(current.image, 0, 0, current.image.width, current.image.height, offsetX, 0, current.scaledWidth, current.scaledHeight);
         offsetX += current.scaledWidth;
       }
-
-      console.log(canvas.toDataURL("image/png"));
-
     }
   }
 }
