@@ -3,15 +3,15 @@
     <div class="pt-wrapper">
       <div class="pt-container">
         <div class="pt-img-header mb-50">
-          <h1>ツールアプリ</h1>
+          <h1>TOOL APP PHOTO JOINER</h1>
         </div>
         <div class="pt-img__body">
           <div class="pt-img__body__box mb-50">
             <button class="btn-light" @click="clearImages()">
-              削除
+              Clear
             </button>
             <button class="btn-info" :disabled="!fileRecordsForUpload.length" @click="mergeFiles()">
-              結合
+              Merge
             </button>
           </div>
           <div class="pt-img__body__add">
@@ -22,7 +22,7 @@
               :meta="true"
               :accept="'image/*'"
               :maxFiles="10"
-              :helpText="'アップロードしたい画像を指定ください。'"
+              :helpText="'Choose Image Files'"
               @select="filesSelected($event)"
               @delete="fileDeleted($event)"
               v-model="fileRecords">
@@ -32,21 +32,22 @@
             <div class="left">
 
               <label for="name">
-                ファイル名
-                <input type="text" placeholder="ファイル名を書き込む..." id="name" v-model="fileName">
+                Tên File
+                <input type="text" id="name" v-model="fileName">
                 .PNG
               </label>
             </div>
 
             <div class="right">
               <button class="btn-info" @click="saveImage()">
-                ダウンロード
+                Download
               </button>
             </div>
           </div>
         </div>
       </div>
-      <canvas id="joined"></canvas>
+      <canvas id="joined" class="div-center"></canvas>
+      <img src="./assets/sample.png" alt="sample" class="div-center" :class="{'d-none': isClicked}">
     </div>
   </div>
 </template>
@@ -230,7 +231,7 @@
       }
     }
 
-    #joined {
+    .div-center {
       display: block;
       margin: 0 auto;
     }
