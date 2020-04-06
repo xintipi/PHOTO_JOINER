@@ -2,11 +2,11 @@
   <div id="app">
     <div class="pt-wrapper">
       <div class="pt-container">
-        <div class="pt-img-header mb-50">
-          <h1>TOOL APP PHOTO JOINER</h1>
+        <div class="pt-img-header">
+          <h2>TOOL APP PHOTO JOINER</h2>
         </div>
         <div class="pt-img__body">
-          <div class="pt-img__body__box mb-50">
+          <div class="pt-img__body__box mb-30">
             <button class="btn-light" @click="clearImages()">
               Clear
             </button>
@@ -23,10 +23,35 @@
               :accept="'image/*'"
               :maxFiles="10"
               :helpText="'Choose Image Files'"
+              :useDragHandle="true"
               @select="filesSelected($event)"
-              @delete="fileDeleted($event)"
               v-model="fileRecords">
             </VueFileAgent>
+
+            <SlickList
+              axis="xy"
+              v-model="fileRecordsForUpload"
+              :style="{'padding': fileRecordsForUpload.length ? '10px': '0'}"
+              class="slick-list"
+              :useDragHandle="isDrag"
+              @input="getChangeLists"
+              @sort-end="sortEnd($event)">
+              <SlickItem
+                v-for="(item, index) in fileRecordsForUpload"
+                :index="index"
+                :key="index"
+                class="slick-item">
+                <div class="box-img">
+                  <span :class="{'img-delete': indexLoaded[index]}" @click="fileDelete(index)"/>
+                  <img
+                    :src="item.urlResized"
+                    :alt="item.file.name"
+                    @load="onLoadImage($event)"
+                    @mousedown="sortStart(index)"
+                    style="width: 100%">
+                </div>
+              </SlickItem>
+            </SlickList>
           </div>
           <div class="pt-after" :class="{'d-none': !isClicked}">
             <div class="left">
@@ -46,7 +71,7 @@
           </div>
         </div>
       </div>
-      <canvas id="joined" class="div-center"></canvas>
+      <canvas id="joined" class="div-center" :class="{'d-none': !isClicked}"></canvas>
       <img src="./assets/sample.png" alt="sample" class="div-center" :class="{'d-none': isClicked}">
     </div>
   </div>
@@ -54,25 +79,29 @@
 
 <script>
   import photoJoiner from "./utils/helper";
-  import { saveAs } from 'file-saver';
+  import {saveAs} from 'file-saver';
+  import {SlickList, SlickItem} from 'vue-slicksort';
 
   export default {
     name: 'App',
+
+    components: {
+      SlickItem,
+      SlickList
+    },
 
     data() {
       return {
         fileRecords: [],
         fileRecordsForUpload: [],
+        indexLoaded: [],
         photoJoiner,
         height: 170,
         images: [],
         fileName: 'picture',
-        isClicked: false
+        isClicked: false,
+        isDrag: true
       };
-    },
-
-    mounted() {
-
     },
 
     methods: {
@@ -114,15 +143,31 @@
         this.isClicked = false
       },
 
-      filesSelected: function (fileRecordsNewlySelected) {
-        const validFileRecords = fileRecordsNewlySelected.filter((fileRecord) => !fileRecord.error);
-        this.fileRecordsForUpload = this.fileRecordsForUpload.concat(validFileRecords);
+      filesSelected() {
+        // Update record in fileRecordsForUpload
+        this.fileRecordsForUpload = this.$refs.vueFileAgent.fileRecords;
       },
 
-      fileDeleted(fileRecord) {
-        const i = this.fileRecordsForUpload.indexOf(fileRecord);
-        if (i !== -1) {
-          this.fileRecordsForUpload.splice(i, 1);
+      fileDelete(index) {
+        this.isDrag = true;
+        this.fileRecordsForUpload.splice(index, 1);
+      },
+
+      sortStart() {
+        this.isDrag = false;
+      },
+
+      sortEnd() {
+        this.isDrag = true;
+      },
+
+      getChangeLists(val) {
+        this.$refs.vueFileAgent.fileRecords = val;
+      },
+
+      onLoadImage(e) {
+        if (e.isTrusted) {
+          this.indexLoaded.push(e.isTrusted)
         }
       }
     }
@@ -132,8 +177,8 @@
 <style lang="scss" scoped>
   #app {
     /deep/ .vue-file-agent.file-input-wrapper {
-      border: 2px solid #f9f9f9;
       text-align: center;
+      border: none;
     }
 
     /deep/ .vue-file-agent .file-preview {
@@ -159,6 +204,11 @@
     /deep/ .file-preview-wrapper {
       width: 12%;
       margin: 5px !important;
+      display: none;
+    }
+
+    /deep/ .file-preview-new {
+      display: inline-block;
     }
 
     .pt-wrapper {
@@ -186,6 +236,28 @@
 
         .pt-img__body__add {
           margin-bottom: 30px;
+          border: 2px solid #f9f9f9;
+
+          .slick-list {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            grid-gap: 10px;
+
+            .slick-item {
+              .box-img {
+                position: relative;
+
+                .img-delete {
+                  background: url("./assets/icons8-delete-24.png");
+                  width: 20px;
+                  height: 20px;
+                  position: absolute;
+                  right: 8px;
+                  top: 5px;
+                }
+              }
+            }
+          }
         }
 
         .pt-after {
@@ -218,8 +290,8 @@
       }
     }
 
-    .mb-50 {
-      margin-bottom: 50px;
+    .mb-30 {
+      margin-bottom: 30px;
     }
 
     .btn-info {
