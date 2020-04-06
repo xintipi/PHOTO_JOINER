@@ -151,6 +151,7 @@
       fileDelete(index) {
         this.isDrag = true;
         this.fileRecordsForUpload.splice(index, 1);
+        this.fileRecords = this.fileRecordsForUpload;
       },
 
       sortStart() {
