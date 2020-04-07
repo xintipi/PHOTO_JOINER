@@ -31,7 +31,7 @@
             <SlickList
               axis="xy"
               v-model="fileRecordsForUpload"
-              :style="{'padding': fileRecordsForUpload.length ? '10px': '0'}"
+              :style="{'padding': fileRecordsForUpload.length ? '0': '0'}"
               class="slick-list"
               :useDragHandle="isDrag"
               @input="getChangeLists"
@@ -214,7 +214,6 @@
 
     .pt-wrapper {
       .pt-container {
-        padding: 0 15%;
         margin-top: 50px;
 
         .pt-img-header {
@@ -240,7 +239,8 @@
           border: 2px solid #f9f9f9;
 
           .slick-list {
-            display: grid;
+            display: inline-flex;
+            width: 100%;
             grid-template-columns: repeat(5, 1fr);
             grid-gap: 10px;
 
