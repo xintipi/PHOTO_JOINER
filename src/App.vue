@@ -21,7 +21,7 @@
               :deletable="true"
               :meta="true"
               :accept="'image/*'"
-              :maxFiles="10"
+              :maxFiles="11"
               :helpText="'Choose Image Files'"
               :useDragHandle="true"
               @select="filesSelected($event)"
