@@ -59,7 +59,7 @@
               <label for="name">
                 Tên File
                 <input type="text" id="name" v-model="fileName">
-                .PNG
+                .JPEG
               </label>
             </div>
 
@@ -124,7 +124,7 @@
         const canvas = document.getElementById('joined');
 
         canvas.toBlob((blob) => {
-          saveAs(blob, `${this.fileName}.png`);
+          saveAs(blob, `${this.fileName}.jpeg`);
         });
       },
 
